@@ -55,13 +55,14 @@ class Player {
     st = null; // The platform the player is on
     dXj = 1; // Ускорение от прыжка
 
-    constructor(x, y, w, h, jh, ms) {
+    constructor(x, y, w, h, jh, ms, hp) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
         this.jumpHeight = jh;
         this.maxSpeed = ms;
+        this.hp = hp;
     }
     draw() {
         ctx.fillStyle = '#ff0000';
@@ -69,6 +70,7 @@ class Player {
     }
     move() {
         player.x += dX * player.dXj; // Speed player X
+
             // Collision X
             for(let k=0; k<box.length; k++) {
                 if(player.x + player.w > box[k].x && player.x < box[k].x + box[k].w/2 && player.y + player.h > box[k].y && player.y < box[k].y + box[k].h){
@@ -83,14 +85,14 @@ class Player {
             }
             //-------
 
-
         player.y += dY; // Speed player Y
+        
             // Collision Y with Box
         for(let j=0; j<box.length; j++) {
-            if(player.y + player.h > box[j].y && player.y < box[j].y + box[j].h/2 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
+            if(player.y + player.h >= box[j].y && player.y < box[j].y + box[j].h - 5 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
                 player.st = j; // We write down the platform that we touch with our feet
             }
-            if(player.y < box[j].y + box[j].h && player.y + player.h > box[j].y + box[j].h/2 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
+            if(player.y < box[j].y + box[j].h && player.y + player.h > box[j].y + box[j].h - 5 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
                 player.y = box[j].y + box[j].h;
                 player.headbutt();
             }
@@ -98,7 +100,24 @@ class Player {
             //-------
 
 
-            // Collision Y with Win box
+        // Collision with Trap box
+        for(let i=0; i<traps.length; i++) {
+            if(player.y + player.h > traps[i].y && player.y < traps[i].y + traps[i].h && player.x + player.w > traps[i].x && player.x < traps[i].x + traps[i].w) {
+                traps[i].hit();
+                player.kick();
+            }
+            if(player.x + player.w > traps[i].x && player.x < traps[i].x + traps[i].w && player.y < traps[i].y + traps[i].h && player.y + player.h > traps[i].y ) {
+                traps[i].hit();
+                player.kick();
+            }
+            if(player.x < traps[i].x + traps[i].w && player.x + player.w > traps[i].x && player.y + player.h > traps[i].y && player.y < traps[i].y + traps[i].h) {
+                traps[i].hit();
+                player.kick();
+            }
+        }
+
+
+            // Collision with Win box
         for(let j=0; j<win.length; j++) {
             if(player.y + player.h > win[j].y && player.y < win[j].y + win[j].h && player.x + player.w > win[j].x && player.x < win[j].x + win[j].w) {
                 player.x = 100;
@@ -106,7 +125,7 @@ class Player {
             }
         }
             //-------
-
+        
 
             // Fall 
         if(player.onGround == false){
@@ -116,6 +135,8 @@ class Player {
             dY = 0;
         }
             //-------
+
+            
     }
     stOnground() {
         if(player.st != null){
@@ -123,7 +144,7 @@ class Player {
             player.y = box[player.st].y - player.h;
             player.onGround = true;
             player.dXj = 1;
-            // Шf the character leaves the platform, drop him
+            // If the character leaves the platform, drop him
             if(player.x + player.w < box[player.st].x || player.x > box[player.st].x + box[player.st].w) {
                 player.st = null;
             }
@@ -149,8 +170,23 @@ class Player {
             player.onGround = false; 
         }
     }
+    kick() {
+        if(player.y + player.h > box[player.st].y - player.jumpHeight ) {
+            player.st = null;
+            player.onGround = false;
+            player.y -= 5;
+            dY = -1.5;
+            dX = -dX * 1.2;
+        }
+        else {
+            player.onGround = false; 
+        }
+    }
 }
     // End class Player ----------------------------------
+
+
+
 
 
     // Class Mob
@@ -160,6 +196,30 @@ class Mob {
     // End class Mob
 
 
+
+
+
+    // Class Trap [Traps, spikes and other damaging elements]
+class Trap {
+    constructor(x, y, w, h, mindamage, maxdamage) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.mindamage = mindamage;
+        this.maxdamage = maxdamage;
+    }
+    draw() {
+        ctx.fillStyle = '#d46f0b';
+        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+    }
+    hit() {
+        player.hp -= getRand(this.mindamage, this.maxdamage);
+    }
+}
+    // End class Trap
+    
+    
     // Class Ground --------------------------------------
 class Ground {
     constructor(x, y, w, h) {
@@ -206,10 +266,11 @@ let dY = 0;
 let world = new World(8);
 const cam = new Camera(0, 0, 600, 350);
 
-let player = new Player(85, canvas.height - 150, 35, 90, 200, 1.6);
+let player = new Player(85, canvas.height - 150, 35, 90, 200, 1.6, 100);
 
 let box = []; // Объекты сколизией со всех сторон
 let win = []; // Объекты завершения уровня
+let traps = []; // Объекты причиняющие урон
 
 box.push(new Ground(0, canvas.height-50, canvas.width, 50));
 box.push(new Ground(300, canvas.height-200, 150, 30));
@@ -224,6 +285,8 @@ box.push(new Ground(1250, 100, 450, 30));
 box.push(new Ground(550, 240, 400, 30));
 
 win.push(new Winbox(100, canvas.height-710, 250, 10));
+
+traps.push(new Trap(1110, 530, 20, 20, 1, 5));
 
 
 /*------------------  GAME CICLE ---------------------- */
@@ -278,9 +341,10 @@ function render() {
     // console.log('Speed Y: ' + dY);
     ctx.font = "15px serif";
     ctx.textBaseline = "hanging";
-    ctx.strokeText(~~dY + ' : ' + ~~player.x + ' x ' + ~~player.y + ' => ' + r, 20, 20);
+    ctx.strokeText(~~dY + ' ' + ~~dX + ' : ' + ~~player.x + ' x ' + ~~player.y + ' => ' + r, 20, 20);
     ctx.strokeText(player.onGround, 20, 35);
     ctx.strokeText(player.st, 20, 50);
+    ctx.strokeText('Здоровье: ' + player.hp, 20, 70);
 
     ctx.strokeText('Прыжок           -> Space', 500, 20);
     ctx.strokeText('Перемещение -> ← →', 500, 35);
@@ -288,6 +352,10 @@ function render() {
     // Draw box array;
     for(let i=0; i<box.length; i++){
         box[i].draw();
+    }
+    // Draw traps array;
+    for(let i=0; i<traps.length; i++){
+        traps[i].draw();
     }
     // Draw win array;
     for(let i=0; i<win.length; i++){
