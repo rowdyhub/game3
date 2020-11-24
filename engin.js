@@ -17,6 +17,7 @@ class World {
         this.g = gravity/100;
     }
 }
+
     // End class World ----------------------------------
 
 
@@ -101,21 +102,32 @@ class Player {
 
 
         // Collision with Trap box
+        
         for(let i=0; i<traps.length; i++) {
             if(player.y + player.h > traps[i].y && player.y < traps[i].y + traps[i].h && player.x + player.w > traps[i].x && player.x < traps[i].x + traps[i].w) {
-                traps[i].hit();
-                player.kick();
+                if(trapTimer == 0){
+                    traps[i].hit();
+                    player.kick();
+                    trapTimer = 300;
+                }
             }
             if(player.x + player.w > traps[i].x && player.x < traps[i].x + traps[i].w && player.y < traps[i].y + traps[i].h && player.y + player.h > traps[i].y ) {
-                traps[i].hit();
-                player.kick();
+                if(trapTimer == 0){
+                    traps[i].hit();
+                    player.kick();
+                    trapTimer = 300;
+                }
             }
             if(player.x < traps[i].x + traps[i].w && player.x + player.w > traps[i].x && player.y + player.h > traps[i].y && player.y < traps[i].y + traps[i].h) {
-                traps[i].hit();
-                player.kick();
+                if(trapTimer == 0){
+                    traps[i].hit();
+                    player.kick();
+                    trapTimer = 300;
+                }
             }
         }
-
+        
+        if(trapTimer != 0) trapTimer--;
 
             // Collision with Win box
         for(let j=0; j<win.length; j++) {
@@ -171,16 +183,13 @@ class Player {
         }
     }
     kick() {
-        if(player.y + player.h > box[player.st].y - player.jumpHeight ) {
             player.st = null;
             player.onGround = false;
             player.y -= 5;
-            dY = -1.5;
+            dY = -3.5;
+            if(0 < dX < 1){dX = -1;}
+            if(0 > dX > -1){dX = 1;}
             dX = -dX * 1.2;
-        }
-        else {
-            player.onGround = false; 
-        }
     }
 }
     // End class Player ----------------------------------
@@ -200,6 +209,8 @@ class Mob {
 
 
     // Class Trap [Traps, spikes and other damaging elements]
+let trapTimer = 0;
+
 class Trap {
     constructor(x, y, w, h, mindamage, maxdamage) {
         this.x = x;
@@ -287,6 +298,7 @@ box.push(new Ground(550, 240, 400, 30));
 win.push(new Winbox(100, canvas.height-710, 250, 10));
 
 traps.push(new Trap(1110, 530, 20, 20, 1, 5));
+traps.push(new Trap(1110-600, 530+337, 400, 20, 10, 15));
 
 
 /*------------------  GAME CICLE ---------------------- */
