@@ -1,16 +1,16 @@
 /*
     Баглист:
-- В положении сидя скорость передвижения не изменяется. Обращение к переменной максимальной скорости идет только при нажатии клавиши движения;
 - Проблема с колизией не решена;
-- После получения урона от traps, скорость не теряется (бесконечный бег);
-
+- При выходе из положения сидя, если сверху есть блок, запрещать вставать.
 
     Добавить: 
-- Силу трения если player не идет (не нажаты кнопки управления);
-- Переработать управление (если нажата кнопка, true, и в control() постоянно проверять, прежде чем делать move());
 - Разобраться с колизией;
 - Лестницу; 
-- Активные элементы: таблички, указатели и т.д. (при нажатии кнопки можно совершить действие)
+- Активные элементы: таблички, указатели и т.д. (при нажатии кнопки можно совершить действие);
+- Добавить атаку (удар);
+- Передвижные платформы (лифты и т.д.);
+- Чекпоинты;
+- Главное меню;
 
 */
 
@@ -79,10 +79,13 @@ class Player {
         this.y = y;
         this.w = w;
         this.h = h; // Высота в положении стоя
+        this.ml = false;
+        this.mr = false;
+        this.dk = false;
         this.hD = h/1.8; // Высота в положении сидя
         this.jumpHeight = jh;
         this.maxSpeed = ms;
-        this.maxSpeedD = ms/2; // Скорость в положении сидя
+        this.maxSpeedD = ms/3; // Скорость в положении сидя
         this.hp = hp;
         this.money = 0;
     }
@@ -153,14 +156,13 @@ class Player {
             // Collision with Win box
         for(let j=0; j<win.length; j++) {
             if(player.y + player.h > win[j].y && player.y < win[j].y + win[j].h && player.x + player.w > win[j].x && player.x < win[j].x + win[j].w) {
-                player.x = 100;
-                player.y = 790;
+                document.location.href = 'map2.html';
             }
         }
             //-------
         
 
-            // Collision with Win box
+            // Collision with Money
         for(let j=0; j<money.length; j++) {
             if(player.y + player.h > money[j].y && player.y < money[j].y + money[j].h && player.x + player.w > money[j].x && player.x < money[j].x + money[j].w) {
                 money[j].pickup();
@@ -214,24 +216,34 @@ class Player {
         }
     }
     duck(){
-        player.h = player.hD;
-        player.maxSpeed = player.maxSpeedD;
-
+        if(player.dk == true){
+            player.h = player.hD;
+            if(player.onGround == true){
+                player.maxSpeed = player.maxSpeedD;
+            }
+        }
+        else {
+            player.h = player.hD * 1.8;
+            player.maxSpeed = player.maxSpeedD * 3;
+        }
     }
-    moveLeft() {
-        dX = -player.maxSpeed;
-    }
-    moveRight() {
-        dX = player.maxSpeed;
+    moveRightLeft() {
+        if(player.mr == true){
+            dX = player.maxSpeed;
+        }
+        else if(player.ml == true){
+            dX = -player.maxSpeed;
+        }
+        else {
+           dX = 0;
+        }
     }
     kick() {
             player.st = null;
             player.onGround = false;
             player.y -= 5;
             dY = -3.5;
-            if(0 < dX < 1){dX = -1;}
-            if(0 > dX > -1){dX = 1;}
-            dX = -dX * 1.2;
+            dX = -dX * 1.4;
     }
     isDead(){
         if(player.hp <= 0){
@@ -347,37 +359,6 @@ let dY = 0;
 
 /*---------------------  OBJECTS ------------------------ */
 
-let world = new World(7);
-const cam = new Camera(0, 0, 600, 350);
-
-let player = new Player(85, canvas.height - 150, 35, 90, 200, 1.7, 100);
-
-let box = []; // Объекты сколизией со всех сторон
-let win = []; // Объекты завершения уровня
-let traps = []; // Объекты причиняющие урон
-let money = []; // Монетки
-
-box.push(new Ground(0, canvas.height-50, canvas.width, 50));
-box.push(new Ground(300, canvas.height-200, 150, 30));
-box.push(new Ground(400, canvas.height-400, 350, 30));
-box.push(new Ground(900, 550, 350, 30));
-box.push(new Ground(100, canvas.height-700, 250, 30));
-box.push(new Ground(1270, 400, 170, 30));
-box.push(new Ground(0, canvas.height-150, 70, 150));
-box.push(new Ground(1590, 430, 150, 30));
-box.push(new Ground(1845, 250, 250, 30));
-box.push(new Ground(1250, 100, 450, 30));
-box.push(new Ground(550, 240, 400, 30));
-
-win.push(new Winbox(100, canvas.height-710, 250, 10));
-
-traps.push(new Trap(1110, 530, 20, 20, 7, 15));
-traps.push(new Trap(1110-600, 530+337, 40, 20, 10, 20));
-
-money.push(new Money(1110-800, 530+320, 10, 30));
-money.push(new Money(1110-820, 530+320, 10, 30));
-money.push(new Money(1110-840, 530+320, 10, 30));
-
 
 /*------------------  GAME CICLE ---------------------- */
 
@@ -392,13 +373,13 @@ function control(){
     //KeyBoard
     document.onkeydown = function(e) {
         if(e.code == "ArrowLeft") {
-            player.moveLeft();
+            player.ml = true;
         }
         if(e.code == "ArrowRight") {
-            player.moveRight();
+            player.mr = true;
         }
         if(e.code == "ArrowDown") {
-            player.duck();
+            player.dk = true;
         }
         if(e.code == "Space") {
            if(player.onGround) {
@@ -408,16 +389,18 @@ function control(){
     }
     document.onkeyup = function(e) {
         if(e.code == "ArrowLeft"){
-            dX = 0;
+            player.ml = false;
         }
         if(e.code == "ArrowRight")  {
-            dX = 0;
+            player.mr = false;
         }
         if(e.code == "ArrowDown") {
-            player.h = player.hD * 1.8;
-            player.maxSpeed = player.maxSpeedD * 2;
+            player.dk = false;
         }
     }
+    
+    player.moveRightLeft();
+    player.duck();
 }
 
 
@@ -440,7 +423,7 @@ function render() {
 
     ctx.fillStyle = "#000";
     ctx.font = "15px serif";
-    ctx.fillText(/* ~~dY + ' ' + ~~dX + ' : ' + ~~player.x + ' x ' + ~~player.y + ' => ' + r */player.maxSpeed, 20, 20);
+    ctx.fillText(/* ~~dY + ' ' + ~~dX + ' : ' + ~~player.x + ' x ' + ~~player.y + ' => ' + r */player.ml + ':' +player.mr, 20, 20);
     ctx.fillText(player.onGround, 20, 35);
     ctx.fillText(player.st, 20, 50);
 
@@ -452,10 +435,6 @@ function render() {
     ctx.fillStyle = "#000";
     ctx.fillText('Здоровье: ' + player.hp, 20, 70);
     ctx.fillText('Монетки: ' + player.money, 20, 105);
-
-    ctx.font = "15px serif";
-    ctx.fillText('Прыжок           -> Space', 500, 20);
-    ctx.fillText('Перемещение -> ← →', 500, 35);
 
     // Draw box array;
     for(let i=0; i<box.length; i++){
@@ -486,5 +465,3 @@ function loop() {
     render();
 }
 setInterval(loop, 30/1000);
-    
-    
