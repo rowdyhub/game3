@@ -2,6 +2,9 @@
     Баглист:
 - Проблема с колизией не решена;
 - При выходе из положения сидя, если сверху есть блок, запрещать вставать.
+- При подборе монетки, удалять ее из массива!!!!!
+- КОЛИЗИЯ - добавить блок в голову для проверки столкновения сверху
+
 
     Добавить: 
 - Разобраться с колизией;
@@ -183,7 +186,7 @@ class Player {
 
             
     }
-    stOnground() {
+    st_on_ground() {
         if(player.st != null){
             // We put the character on the element which he touches with his feet
             player.y = box[player.st].y - player.h;
@@ -227,7 +230,7 @@ class Player {
             player.maxSpeed = player.maxSpeedD * 3;
         }
     }
-    moveRightLeft() {
+    move_right_left() {
         if(player.mr == true){
             dX = player.maxSpeed;
         }
@@ -245,7 +248,7 @@ class Player {
             dY = -3.5;
             dX = -dX * 1.4;
     }
-    isDead(){
+    is_dead(){
         if(player.hp <= 0){
             player = null;
             alert('You are dead!')
@@ -326,7 +329,8 @@ class Money {
         player.money ++ ;
         this.x = null;
         this.y = null;
-        console.log(player.money);
+        //console.log(player.money);
+        console.log(money.length);
     }
 }
     // End class Money ----------------------------------
@@ -399,16 +403,16 @@ function control(){
         }
     }
     
-    player.moveRightLeft();
+    player.move_right_left();
     player.duck();
 }
 
 
 function update() {
-    player.stOnground();
+    player.st_on_ground();
     player.move();
     cam.move(player.x, player.y);
-    player.isDead();
+    player.is_dead();
 }
 
 

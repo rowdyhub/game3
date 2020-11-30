@@ -17,6 +17,6 @@ win.push(new Winbox(2400, 990, 100, 10));
 //traps.push(new Trap(1110, 530, 20, 20, 7, 15));
 //traps.push(new Trap(1110-600, 530+337, 40, 20, 10, 20));
 
-money.push(new Money(200, 950, 10, 30));
-money.push(new Money(250, 930, 10, 30));
-money.push(new Money(300, 950, 10, 30));
+money.push(new Money(500, 900, 10, 30));
+money.push(new Money(700, 750, 10, 30));
+money.push(new Money(900, 900, 10, 30));
