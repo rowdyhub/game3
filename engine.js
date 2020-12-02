@@ -31,6 +31,17 @@ canvas.height = window.innerHeight;
 
 
 
+/*---------------------  TEXTURES ------------------------ */
+let plyerTex = new Image(90, 30);
+plyerTex.src = 'pl.png';
+
+let groundTex = new Image();
+groundTex.src = 'grnd.png';
+
+
+
+
+
 /*---------------------  CLASS  ------------------------ */
     // Class World ----------------------------------
 class World {
@@ -93,8 +104,9 @@ class Player {
         this.money = 0;
     }
     draw() {
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+        /* ctx.fillStyle = '#ff0000';
+        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h); */
+        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y);
     }
     move() {
         player.x += dX * player.dXj; // Speed player X
@@ -303,8 +315,9 @@ class Ground {
         this.h = h;
     }
     draw() {
-        ctx.fillStyle = '#2e2415';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+        /* ctx.fillStyle = '#2e2415';
+        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h); */
+        ctx.drawImage(groundTex, this.x - cam.x, this.y - cam.y, this.w, this.h);
     }
 }
     // End class Ground ----------------------------------
@@ -361,7 +374,6 @@ class Winbox {
 let dX = 0;
 let dY = 0;
 
-/*---------------------  OBJECTS ------------------------ */
 
 
 /*------------------  GAME CICLE ---------------------- */
@@ -468,4 +480,4 @@ function loop() {
     update();
     render();
 }
-setInterval(loop, 30/1000);
+setInterval(loop, (30/1000)*200);
