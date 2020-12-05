@@ -96,7 +96,7 @@ class Player {
         this.ml = false;
         this.mr = false;
         this.dk = false;
-        this.hD = h/1.8; // Высота в положении сидя
+        this.hD = h / 1.6; // Высота в положении сидя
         this.jumpHeight = jh;
         this.maxSpeed = ms;
         this.maxSpeedD = ms/3; // Скорость в положении сидя
@@ -104,9 +104,9 @@ class Player {
         this.money = 0;
     }
     draw() {
-        /* ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h); */
-        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y);
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y, this.w, this.h);
     }
     move() {
         player.x += dX * player.dXj; // Speed player X
@@ -232,13 +232,17 @@ class Player {
     }
     duck(){
         if(player.dk == true){
-            player.h = player.hD;
+            if(player.h >= player.hD){
+                player.h -= 2;
+            }
             if(player.onGround == true){
                 player.maxSpeed = player.maxSpeedD;
             }
         }
         else {
-            player.h = player.hD * 1.8;
+            if(player.h <= player.hD * 1.6){
+                player.h += 2;
+            }
             player.maxSpeed = player.maxSpeedD * 3;
         }
     }
