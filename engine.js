@@ -113,10 +113,10 @@ class Player {
 
             // Collision X
             for(let k=0; k<box.length; k++) {
-                if(player.x + player.w > box[k].x && player.x < box[k].x + box[k].w/2 && player.y + player.h > box[k].y && player.y < box[k].y + box[k].h){
+                if(player.x + player.w > box[k].x && player.x < box[k].x - player.w + 3 && player.y + player.h > box[k].y && player.y < box[k].y + box[k].h){
                     player.x = box[k].x - player.w;
                 }
-                if(player.x < box[k].x + box[k].w && player.x + player.w > box[k].x + box[k].w/2 &&  player.y + player.h > box[k].y && player.y < box[k].y + box[k].h){
+                if(player.x < box[k].x + box[k].w && player.x + player.w > box[k].x + box[k].w + player.w - 3 &&  player.y + player.h > box[k].y && player.y < box[k].y + box[k].h){
                     player.x = box[k].x + box[k].w;
                 }
             }
@@ -129,12 +129,13 @@ class Player {
         
             // Collision Y with Box
         for(let j=0; j<box.length; j++) {
-            if(player.y + player.h >= box[j].y && player.y < box[j].y + box[j].h - 5 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
+            if(player.y + player.h >= box[j].y && player.y < box[j].y && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
                 player.st = j; // We write down the platform that we touch with our feet
             }
             if(player.y < box[j].y + box[j].h && player.y + player.h > box[j].y + box[j].h - 5 && player.x + player.w > box[j].x && player.x < box[j].x + box[j].w) {
                 player.y = box[j].y + box[j].h;
                 player.headbutt();
+                player.h -= 2;
             }
         }
             //-------
@@ -243,7 +244,9 @@ class Player {
             if(player.h <= player.hD * 1.6){
                 player.h += 2;
             }
-            player.maxSpeed = player.maxSpeedD * 3;
+            if(player.h == player.hD * 1.6) {
+                player.maxSpeed = player.maxSpeedD * 3;
+            }
         }
     }
     move_right_left() {
