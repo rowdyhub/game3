@@ -1,9 +1,7 @@
 /*
     Баглист:
-- Проблема с колизией не решена;
-- При выходе из положения сидя, если сверху есть блок, запрещать вставать.
 - При подборе монетки, удалять ее из массива!!!!!
-- КОЛИЗИЯ - добавить блок в голову для проверки столкновения сверху
+- Текст таблички отрисовывается не на первом плане
 
 
     Добавить: 
@@ -32,7 +30,7 @@ canvas.height = window.innerHeight;
 
 
 /*---------------------  TEXTURES ------------------------ */
-let plyerTex = new Image(90, 30);
+let plyerTex = new Image(90, 35);
 plyerTex.src = 'pl.png';
 
 let groundTex = new Image();
@@ -106,7 +104,7 @@ class Player {
     draw() {
         ctx.fillStyle = '#ff0000';
         ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
-        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y, this.w, this.h);
+        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y, 35, 90);
     }
     move() {
         player.x += dX * player.dXj; // Speed player X
@@ -151,20 +149,6 @@ class Player {
                     trapTimer = 300;
                 }
             }
-            if(player.x + player.w > traps[i].x && player.x < traps[i].x + traps[i].w && player.y < traps[i].y + traps[i].h && player.y + player.h > traps[i].y ) {
-                if(trapTimer == 0){
-                    traps[i].hit();
-                    player.kick();
-                    trapTimer = 300;
-                }
-            }
-            if(player.x < traps[i].x + traps[i].w && player.x + player.w > traps[i].x && player.y + player.h > traps[i].y && player.y < traps[i].y + traps[i].h) {
-                if(trapTimer == 0){
-                    traps[i].hit();
-                    player.kick();
-                    trapTimer = 300;
-                }
-            }
         }
         
         if(trapTimer != 0) trapTimer--;
@@ -185,7 +169,14 @@ class Player {
                 money[j].stat = false;
             }
         }
-            //-------            
+            //-------     
+            // Collision with Plate
+        for(let j=0; j<plate.length; j++) {
+            if(player.y + player.h > plate[j].y && player.y < plate[j].y + plate[j].h && player.x + player.w > plate[j].x && player.x < plate[j].x + plate[j].w) {
+                plate[j].use();
+            }
+        }
+            //-------         
 
 
             // Fall 
@@ -356,6 +347,28 @@ class Money {
     // End class Money ----------------------------------
 
 
+    // Class Plate --------------------------------------
+class Plate {
+    constructor(x, y, w, h, t) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.t = t; // Text in plate
+    }
+    draw() {
+        ctx.fillStyle = '#30ef30';
+        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+    }
+    use(){
+        ctx.fillStyle = "#000000"
+        ctx.font = "15px serif";
+        ctx.fillText(this.t, player.x - 100, player.y - 50);
+    }
+}
+    // End class Plate ----------------------------------
+
+
     // Class Ground --------------------------------------
 class Winbox {
     constructor(x, y, w, h) {
@@ -459,6 +472,7 @@ function render() {
     ctx.fillText('Здоровье: ' + player.hp, 20, 70);
     ctx.fillText('Монетки: ' + player.money, 20, 105);
 
+
     // Draw box array;
     for(let i=0; i<box.length; i++){
         box[i].draw();
@@ -474,6 +488,10 @@ function render() {
     // Draw money array;
     for(let i=0; i<money.length; i++){
         money[i].draw();
+    }
+    // Draw plate array;
+    for(let i=0; i<plate.length; i++){
+        plate[i].draw();
     }
 
     // Draw player
