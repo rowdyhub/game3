@@ -30,13 +30,32 @@ canvas.height = window.innerHeight;
 
 
 /*---------------------  TEXTURES ------------------------ */
-let plyerTex = new Image(90, 35);
-plyerTex.src = 'pl.png';
+let plr = new Image(90, 35);
+plr.src = 'plr.png';
 
-let groundTex = new Image();
-groundTex.src = 'grnd.png';
+let pll = new Image(90, 35);
+pll.src = 'pll.png';
 
+let pld = new Image(90/1.6, 35);
+pld.src = 'pld.png';
 
+let pldr = new Image(90/1.6, 35);
+pldr.src = 'pldr.png';
+
+let pldl = new Image(90/1.6, 35);
+pldl.src = 'pldl.png';
+
+let pljur = new Image(90/1.6, 35);
+pljur.src = 'pljur.png';
+
+let pljdr = new Image(90/1.6, 35);
+pljdr.src = 'pljdr.png';
+
+let pljul = new Image(90/1.6, 35);
+pljul.src = 'pljul.png';
+
+let pljdl = new Image(90/1.6, 35);
+pljdl.src = 'pljdl.png';
 
 
 
@@ -91,9 +110,11 @@ class Player {
         this.y = y;
         this.w = w;
         this.h = h; // Высота в положении стоя
+        this.p = 0; // Поза персонажа: 0 - стоять, 1 - идти вправо стоя, 2 - идти влево стоя, 3 - сидеть, 4 - идти вправо сидя, 5 - идти влево сидя
         this.ml = false;
         this.mr = false;
         this.dk = false;
+        this.use = false;
         this.hD = h / 1.6; // Высота в положении сидя
         this.jumpHeight = jh;
         this.maxSpeed = ms;
@@ -102,9 +123,44 @@ class Player {
         this.money = 0;
     }
     draw() {
-        ctx.fillStyle = '#ff0000';
+        ctx.fillStyle = '#ff000030';
         ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
-        ctx.drawImage(plyerTex, this.x - cam.x, this.y - cam.y, 35, 90);
+        if(player.dk == false) {
+            if(dX == 0 && dY == 0) {
+                ctx.drawImage(plr, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX > 0 && dY == 0) {
+                ctx.drawImage(plr, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX < 0 && dY == 0) {
+                ctx.drawImage(pll, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX >= 0 && dY < 0) {
+                ctx.drawImage(pljur, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX >= 0 && dY > 0) {
+                ctx.drawImage(pljdr, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX < 0 && dY < 0) {
+                ctx.drawImage(pljul, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX < 0 && dY > 0) {
+                ctx.drawImage(pljdl, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+        }
+        if(player.dk == true) {
+            if(dX == 0) {
+                ctx.drawImage(pld, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX > 0) {
+                ctx.drawImage(pldr, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+            else if(dX < 0) {
+                ctx.drawImage(pldl, this.x - cam.x - 25, this.y - cam.y, this.w + 50, this.h);
+            }
+        }
+        
+        
     }
     move() {
         player.x += dX * player.dXj; // Speed player X
@@ -169,11 +225,17 @@ class Player {
                 money[j].stat = false;
             }
         }
-            //-------     
+            //-------
+
+
             // Collision with Plate
         for(let j=0; j<plate.length; j++) {
             if(player.y + player.h > plate[j].y && player.y < plate[j].y + plate[j].h && player.x + player.w > plate[j].x && player.x < plate[j].x + plate[j].w) {
+                plate[j].check = true;
                 plate[j].use();
+            }
+            else {
+                plate[j].check = false;
             }
         }
             //-------         
@@ -215,7 +277,7 @@ class Player {
         if(player.y + player.h > box[player.st].y - player.jumpHeight) {
             player.st = null;
             player.onGround = false;
-            dY -= 5.5;
+            dY -= 4.5;
             player.dXj = 1.4;
         }
         else {
@@ -243,9 +305,23 @@ class Player {
     move_right_left() {
         if(player.mr == true){
             dX = player.maxSpeed;
+            if(this.dk) {
+                this.p = 4;
+            }
+            else {
+                this.p = 1;
+            }
+            
         }
         else if(player.ml == true){
             dX = -player.maxSpeed;
+            if(this.dk) {
+                this.p = 5;
+            }
+            else {
+                this.p = 2;
+            }
+            
         }
         else {
            dX = 0;
@@ -294,11 +370,13 @@ class Trap {
         this.maxdamage = maxdamage;
     }
     draw() {
-        ctx.fillStyle = '#d46f0b';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+        //ctx.fillStyle = '#d46f0b40';
+        //ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
     }
     hit() {
-        player.hp -= getRand(this.mindamage, this.maxdamage);
+        let damage = getRand(this.mindamage, this.maxdamage)
+        player.hp -= damage;
+        console.log(damage);
     }
 }
     // End class Trap
@@ -313,9 +391,8 @@ class Ground {
         this.h = h;
     }
     draw() {
-        /* ctx.fillStyle = '#2e2415';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h); */
-        ctx.drawImage(groundTex, this.x - cam.x, this.y - cam.y, this.w, this.h);
+        //ctx.fillStyle = '#ff000040';
+        //ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
     }
 }
     // End class Ground ----------------------------------
@@ -349,21 +426,34 @@ class Money {
 
     // Class Plate --------------------------------------
 class Plate {
-    constructor(x, y, w, h, t) {
+    constructor(x, y, w, h, t, i) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
         this.t = t; // Text in plate
+        this.check = false;
+        this.interaction = i;
     }
     draw() {
-        ctx.fillStyle = '#30ef30';
-        ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
+        //ctx.fillStyle = '#30ef3040';
+        //ctx.fillRect(this.x - cam.x, this.y - cam.y, this.w, this.h);
     }
-    use(){
-        ctx.fillStyle = "#000000"
-        ctx.font = "15px serif";
-        ctx.fillText(this.t, player.x - 100, player.y - 50);
+    write(){
+        if(this.check) {
+            ctx.fillStyle = "#000000"
+            ctx.font = "20px mainfont";
+            ctx.fillText(this.t, this.x + (this.w/2) - cam.x - (this.t.length*9/2), this.y - cam.y - 110);
+            return
+        }
+    }
+    use() {
+        if(this.interaction == true) {
+            if(player.use == true) {
+                this.t = 'Использовано';
+                return
+            }
+        }
     }
 }
     // End class Plate ----------------------------------
@@ -422,6 +512,9 @@ function control(){
                player.jump();
            }
         }
+        if(e.code == 'KeyE') {
+            player.use = true;
+        }
     }
     document.onkeyup = function(e) {
         if(e.code == "ArrowLeft"){
@@ -433,8 +526,10 @@ function control(){
         if(e.code == "ArrowDown") {
             player.dk = false;
         }
+        if(e.code == 'KeyE') {
+            player.use = false;
+        }
     }
-    
     player.move_right_left();
     player.duck();
 }
@@ -450,7 +545,7 @@ function update() {
 
 function render() {
     // Draw background
-    ctx.fillStyle = '#b7c4ba';
+    ctx.fillStyle = '#412d1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
 
@@ -458,20 +553,16 @@ function render() {
     // console.log('Speed Y: ' + dY);
 
     ctx.fillStyle = "#000";
-    ctx.font = "15px serif";
+    ctx.font = "15px mainfont";
     ctx.fillText(/* ~~dY + ' ' + ~~dX + ' : ' + ~~player.x + ' x ' + ~~player.y + ' => ' + r */player.ml + ':' +player.mr, 20, 20);
     ctx.fillText(player.onGround, 20, 35);
     ctx.fillText(player.st, 20, 50);
 
     ctx.textBaseline = "hanging";
     
-    ctx.font = "25px serif";
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(10, 60, 200, 80);
-    ctx.fillStyle = "#000";
-    ctx.fillText('Здоровье: ' + player.hp, 20, 70);
-    ctx.fillText('Монетки: ' + player.money, 20, 105);
-
+    
+    ctx.drawImage(back, 0 - cam.x, 0 - cam.y);
+    ctx.drawImage(grnd, 0 - cam.x, 0 - cam.y);
 
     // Draw box array;
     for(let i=0; i<box.length; i++){
@@ -492,10 +583,21 @@ function render() {
     // Draw plate array;
     for(let i=0; i<plate.length; i++){
         plate[i].draw();
+        plate[i].write();
     }
 
     // Draw player
     player.draw();
+    
+    ctx.drawImage(light, 0 - cam.x, 0 - cam.y);
+
+    //HUD
+    ctx.font = "25px mainfont";
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(10, 70, 230, 80);
+    ctx.fillStyle = "#000";
+    ctx.fillText('Здоровье: ' + player.hp, 20, 80);
+    ctx.fillText('Монетки: ' + player.money, 20, 115);
 }
 
 

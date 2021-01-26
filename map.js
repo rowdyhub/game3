@@ -24,10 +24,15 @@ box.push(new Ground(550, 240, 400, 30));
 win.push(new Winbox(100, canvas.height-710, 250, 10));
 
 traps.push(new Trap(1110, 530, 20, 20, 7, 15));
-traps.push(new Trap(1110-600, 530+337, 40, 20, 10, 20));
+traps.push(new Trap(1110-600, 530+337, 40, 20, 19, 20));
 
 money.push(new Money(1110-800, 530+320, 10, 30));
 money.push(new Money(1110-820, 530+320, 10, 30));
 money.push(new Money(1110-840, 530+320, 10, 30));
 
-plate.push(new Plate(1110-240, 530+305, 25, 50, 'Табличка'));
+plate.push(new Plate(1110-240, 530+305, 25, 50, 'Нажми "E" для взаимодействия', true));
+
+//textures
+let back = new Image();
+let grnd = new Image();
+let light = new Image();
